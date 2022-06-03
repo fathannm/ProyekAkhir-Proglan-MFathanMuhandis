@@ -12,12 +12,12 @@ typedef struct news{ //deklarasi struct berita
     char link[200];
 }news;
 
-typedef struct loginAdmin{ //deklarasi struct login admin
+typedef struct loginUser{ //deklarasi struct login admin
     char fname[30];
     char username[30];
     char password[20];
-    struct loginAdmin* next;
-}admin;
+    struct loginUser* next;
+}user;
 
 void gudangBerita(){ //fungsi untuk menampilkan berita
     FILE *fp = NULL; //deklarasi file

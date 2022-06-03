@@ -37,9 +37,9 @@ void loginUser(void);
 void registration(void);
 void listUser();
 void deleteUser(void);
-void transferDataUser(struct loginAdmin *head);
-void insert(struct loginAdmin **head, char fname[], char username[], char password[]);
-void printList(struct loginAdmin *head);
+void transferDataUser(struct loginUser *head);
+void insert(struct loginUser **head, char fname[], char username[], char password[]);
+void printList(struct loginUser *head);
 
 void opening(){
 	int i;
@@ -1001,7 +1001,7 @@ void loginUser(){
         exit(1);
     }
 
-    admin l;
+    user l;
 
     printf("\nPlease Enter your login credentials below\n\n");
     printf("Username: ");
@@ -1028,7 +1028,7 @@ void loginUser(){
 
 void registration(){
 	FILE *log;
-	admin l;
+	user l;
 	char username[30], password[20], fname[30];
 
 	log = fopen("login.txt","a");
@@ -1071,7 +1071,7 @@ void registration(){
 void listUser(){
 	system("cls");
 	FILE *log;
-	admin l;
+	user l;
 	int i = 0;
 	log = fopen("login.txt","r");
 	if (log == NULL){
@@ -1081,13 +1081,13 @@ void listUser(){
 	int pilihMenu;
 	do{
 		system("cls");
-		//tabel list admin
+		//tabel list user
 		printf("\n+--------------------------------------+\n");
 		printf("|              LIST USER               |\n");
 		printf("+--------------------------------------+\n");
 		printf("| No.  |   First Name   |   Username   |\n");
 		printf("+--------------------------------------+\n");
-		//list admin
+		//list user
 		while(fread(&l, sizeof(l), 1, log)){
 			printf("| %d.   |   %10s   |   %8s   |\n", ++i, l.fname, l.username);
 		}
@@ -1095,7 +1095,7 @@ void listUser(){
 		printf("+--------------------------------------+\n");
 
 		printf("\n1. Hapus User");
-		printf("\n2. Kembali ke menu admin");
+		printf("\n2. Kembali ke menu user");
 		printf("\n\nPilihan anda? ");
 		scanf("%d", &pilihMenu);
 
@@ -1104,7 +1104,7 @@ void listUser(){
 				deleteUser();
 				break;
 			case 2:
-				transferDataUser(l);
+				//transferDataUser();
 				break;
 		}
 		if (pilihMenu > 2 && pilihMenu < 0){ //error handling
@@ -1114,9 +1114,9 @@ void listUser(){
 	}while(pilihMenu != 2);
 }
 
-void transferDataUser(struct loginAdmin *head){
+void transferDataUser(struct loginUser *head){
 	FILE *log;
-	admin l;
+	user l;
 	log = fopen("login.txt","r");
 	if (log != NULL){
 		while(fscanf(log, "%30[^\n]s", l.fname) == 1 && fscanf(log, "%30[^\n]s", l.username) == 1
@@ -1127,9 +1127,9 @@ void transferDataUser(struct loginAdmin *head){
 	fclose(log);
 }
 
-void insert(struct loginAdmin **head, char fname[], char username[], char password[]){
-	struct loginAdmin *log = (struct loginAdmin*)malloc(sizeof(struct loginAdmin));
-	struct loginAdmin *temp = *head;
+void insert(struct loginUser **head, char fname[], char username[], char password[]){
+	struct loginUser *log = (struct loginUser*)malloc(sizeof(struct loginUser));
+	struct loginUser *temp = *head;
 
 	strcpy(log->fname, fname);
 	strcpy(log->username, username);
@@ -1152,8 +1152,8 @@ void insert(struct loginAdmin **head, char fname[], char username[], char passwo
 	printList(temp);
 }
 
-void printList(struct loginAdmin *head){
-    struct loginAdmin *temp = head;
+void printList(struct loginUser *head){
+    struct loginUser *temp = head;
 
     //iterate the entire linked list and print the data
     while(temp != NULL)
@@ -1170,22 +1170,22 @@ void printList(struct loginAdmin *head){
 void deleteUser(void){
 	system("cls");
 	FILE *log;
-	admin l;
+	user l;
 	int i = 0;
-	log = fopen("loginUser.txt","r");
+	log = fopen("login.txt","r");
 	if (log == NULL){
 		fputs("Error at opening File!", stderr);
 		exit(1);
 	}
 
 	int option;
-	//tabel list admin
+	//tabel list user
 	printf("\n+--------------------------------------+\n");
 	printf("|              LIST USER               |\n");
 	printf("+--------------------------------------+\n");
 	printf("| No.  |   First Name   |   Username   |\n");
 	printf("+--------------------------------------+\n");
-	//list admin
+	//list user
 	while(fread(&l, sizeof(l), 1, log)){
 		printf("| %d.   |   %10s   |   %8s   |\n", ++i, l.fname, l.username);
 	}
