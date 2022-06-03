@@ -3,8 +3,9 @@
 
 int main(){	
 	//fungsi opening
+	struct loginUser *head;
     opening();
-	mainMenu();
+	mainMenu(head);
 
 	return 0;
 }

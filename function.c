@@ -8,9 +8,9 @@
 
 //function prototype
 void opening();
-void mainMenu();
+void mainMenu(struct loginUser *head);
 void menu_1();
-void menu_2();
+void menu_2(struct loginUser *head);
 void menuLoginUser();
 void login();
 void printBerita(int page);
@@ -35,8 +35,8 @@ void restoreNews();
 void panduan ();
 void loginUser(void);
 void registration(void);
-void listUser();
-void deleteUser(void);
+int listUser(struct loginUser *head);
+void deleteUser(struct loginUser *head);
 void transferDataUser(struct loginUser *head);
 void insert(struct loginUser **head, char fname[], char username[], char password[]);
 void printList(struct loginUser *head);
@@ -67,7 +67,7 @@ void opening(){
   	getch(); 
 }
 
-void mainMenu(){
+void mainMenu(struct loginUser *head){
 	int  stopMenu = 0, i = 0, pilihMenu = 0; 
 	
 	//mengecek apakah file newsData.dat ada atau tidak, jika tidak akan dibuat baru
@@ -92,7 +92,7 @@ void mainMenu(){
     	pilihMenu = getch(); //mengambil inputan user
 		switch(pilihMenu){ //memilih menu
       		case '1': menuLoginUser(); break; //menu 1
-      		case '2': login(); break; //menu 2
+      		case '2': login(head); break; //menu 2
       		case '3':
 	  			system("CLS");
 	  			panduan(); //menu 3
@@ -158,7 +158,7 @@ void menu_1(){
     system("CLS");
 }
 
-void menu_2(){
+void menu_2(struct loginUser *head){
 	int pilihMenu = 0, cek, page = 0;
 	char choose[10];
 	do{
@@ -188,9 +188,9 @@ void menu_2(){
 		else if(strcmp(choose,"4") == 0){
 			pilihMenu = 4;
 		}
-		else if(strcmp(choose,"5") == 0)
+		else if(strcmp(choose,"5") == 0){
 			pilihMenu = 5;
-
+		}
 		//pilihan menu
 		switch(pilihMenu){
 			case 1 : {
@@ -206,7 +206,7 @@ void menu_2(){
 				break;
 			}
 			case 4 : {
-				listUser();
+				listUser(head);
 				break;
 			}
 			case 5 : //menu kembali ke menu utama
@@ -245,7 +245,7 @@ void menuLoginUser(){
     }
 }
 
-void login(){ 
+void login(struct loginUser *head){ 
   	char username[20], userpwd[10], pilih[3];
  	int i, salah; 
  	system("CLS");
@@ -264,7 +264,7 @@ void login(){
   	if(strcmp(username, "admin") == 0){ //membandingkan username dan password
     	if(strcmp(userpwd, "123") == 0){
 			printf("\n\n  Login Berhasil. Selamat datang admin!");
-			menu_2();
+			menu_2(head);
     	}else{
 			printf("\n\n  Password yang dimasukkan salah.");
 			do{
@@ -272,10 +272,10 @@ void login(){
 			scanf ("%s", &pilih);
 			if( strcmp( pilih, "yes") == 0 ){
 				system("CLS");
-				mainMenu();
+				mainMenu(head);
 			}else if (strcmp( pilih, "no") == 0){
 				system("CLS");
-				login();
+				login(head);
 			}else { //error handling
 				printf("\n  Input yang ada masukkan tidak ada");
 				salah = 1;
@@ -289,10 +289,10 @@ void login(){
 			scanf ("%s", &pilih);
 			if( strcmp( pilih, "yes") == 0 ){
 				system("CLS");
-				mainMenu();
+				mainMenu(head);
 			}else if (strcmp( pilih, "no") == 0){
 				system("CLS");
-				login();
+				login(head);
 			}else {
 				printf("\n  Input yang ada masukkan tidak ada");
 				salah = 1;
@@ -1040,7 +1040,7 @@ void registration(){
 	printf("\n Please Enter your login credentials below\n\n");
 	// looping cek username dan password sampai benar
 	printf(" Nama Anda: ");
-	scanf("%s", &fname);
+	scanf(" %[^\n]c", &fname);
 	printf(" Username: ");
 	scanf("%s", &username);
 	printf(" Password: ");
@@ -1068,17 +1068,24 @@ void registration(){
 }
 
 //fungsi untuk menampilkan list user dalam bentuk tabel
-void listUser(){
+int listUser(struct loginUser *head){
 	system("cls");
 	FILE *log;
 	user l;
+
 	int i = 0;
+	int pilihMenu;
+	
 	log = fopen("login.txt","r");
 	if (log == NULL){
 		fputs("Error at opening File!", stderr);
 		exit(1);
 	}
-	int pilihMenu;
+	head = malloc(sizeof(user));
+	if(head == NULL){
+		return 1;
+	}
+	
 	do{
 		system("cls");
 		//tabel list user
@@ -1091,20 +1098,19 @@ void listUser(){
 		while(fread(&l, sizeof(l), 1, log)){
 			printf("| %d.   |   %10s   |   %8s   |\n", ++i, l.fname, l.username);
 		}
-		fclose(log);
 		printf("+--------------------------------------+\n");
 
-		printf("\n1. Hapus User");
-		printf("\n2. Kembali ke menu user");
+		printf("\n1. Hapus User (Dalam Perbaikan)");
+		printf("\n2. Kembali ke Menu Admin");
 		printf("\n\nPilihan anda? ");
 		scanf("%d", &pilihMenu);
 
 		switch(pilihMenu){
 			case 1:
-				deleteUser();
+				deleteUser(head);
 				break;
 			case 2:
-				//transferDataUser();
+				menu_2(head);
 				break;
 		}
 		if (pilihMenu > 2 && pilihMenu < 0){ //error handling
@@ -1112,6 +1118,7 @@ void listUser(){
 			Sleep(500);
 		}
 	}while(pilihMenu != 2);
+	fclose(log);
 }
 
 void transferDataUser(struct loginUser *head){
@@ -1154,20 +1161,19 @@ void insert(struct loginUser **head, char fname[], char username[], char passwor
 
 void printList(struct loginUser *head){
     struct loginUser *temp = head;
-
     //iterate the entire linked list and print the data
-    while(temp != NULL)
-    {
-         printf("%30[^\n]s ", temp->fname);
-		 printf("%30[^\n]s ", temp->username);
-		 printf("%30[^\n]s ", temp->password);
+    while(temp != NULL){
+         printf("%s ", temp->fname);
+		 printf("%s ", temp->username);
+		 printf("%s ", temp->password);
          temp = temp->next;
     }
-    printf("NULL\n");
+	printf("\nPress any key to continue...");
+	getch();
 }
 
-//fungsi delete user memakai linked list
-void deleteUser(void){
+//fungsi untuk menghapus satu user pilihan
+void deleteUser(struct loginUser *head){
 	system("cls");
 	FILE *log;
 	user l;
@@ -1196,26 +1202,50 @@ void deleteUser(void){
 	printf("\n\nPilihan nomor? ");
 	scanf("%d", &option);
 	
-	//hapus user
-	if(option == i){
+	//hapus user yang dipiih
+	if(option > i){
+		printf("\n  Invalid Menu! Ulang Kembali ");
+		Sleep(500);
+	}
+	else{
+		log = fopen("login.txt","r");
+		if (log == NULL){
+			fputs("Error at opening File!", stderr);
+			exit(1);
+		}
+		
+		struct loginUser *temp = head;
+		struct loginUser *prev = NULL;
+		
+		int j = 0;
+		while(temp != NULL){
+			if(j == option-1){
+				prev->next = temp->next;
+				free(temp);
+				break;
+			}
+			prev = temp;
+			temp = temp->next;
+			j++;
+		}
+
+		FILE *log;
 		log = fopen("login.txt","w");
 		if (log == NULL){
 			fputs("Error at opening File!", stderr);
 			exit(1);
 		}
 		
-		while(fread(&l, sizeof(l), 1, log)){
-			if(strcmp(l.fname,l.fname)!=0 || strcmp(l.username,l.username)!=0 || strcmp(l.password,l.password)!=0){
-				fprintf(log, "%s\n", l.fname);
-				fprintf(log, "%s\n", l.username);
-				fprintf(log, "%s\n", l.password);
-			}
+		temp = head;
+		while(temp != NULL){
+			fprintf(log, "%s\n", temp->fname);
+			fprintf(log, "%s\n", temp->username);
+			fprintf(log, "%s\n", temp->password);
+			temp = temp->next;
 		}
 		fclose(log);
-		printf("\nUser berhasil dihapus\n");
+		printf("\nUser berhasil dihapus!\n");
 		Sleep(1000);
-	}else{
-		printf("\nUser tidak ditemukan\n");
-		Sleep(1000);
+		listUser(head);
 	}
 }
