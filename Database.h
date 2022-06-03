@@ -13,9 +13,9 @@ typedef struct news{ //deklarasi struct berita
 }news;
 
 typedef struct loginUser{ //deklarasi struct login admin
-    char fname[30];
-    char username[30];
-    char password[20];
+    char fname[10];
+    char username[8];
+    char password[8];
     struct loginUser* next;
 }user;
 

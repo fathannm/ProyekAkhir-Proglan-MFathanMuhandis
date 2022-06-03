@@ -242,7 +242,10 @@ void menuLoginUser(){
     } else if(option == 2){
         system("CLS");
         loginUser();
-    }
+    } else if(option > 2 || option < 1){
+		printf("\n  Invalid Menu! Ulang Kembali ");
+		Sleep(750);
+	}
 }
 
 void login(struct loginUser *head){ 
@@ -990,9 +993,10 @@ void panduan(){
   	getch(); 
 }
 
+//fungsi untuk login user
 void loginUser(){
 	system("cls");
-    char username[30], password[20];
+    char username[8], password[8];
     FILE *log;
 
     log = fopen("login.txt","r");
@@ -1003,22 +1007,22 @@ void loginUser(){
 
     user l;
 
-    printf("\nPlease Enter your login credentials below\n\n");
-    printf("Username: ");
+    printf("\n Silahkan masukkan data pengguna anda dengan benar di bawah ini.\n\n");
+    printf(" Username: ");
     scanf("%s", &username);
-    printf("\nPassword: ");
+    printf("\n Password: ");
     scanf("%s", &password);
 
     while(fread(&l, sizeof(l), 1, log)){
         if(strcmp(username,l.username)==0 && strcmp(password,l.password)==0){   
-            printf("\nSuccessful Login\n");
+            printf("\nLogin Berhasil.\n");
 			Sleep(1000);
 			menu_1();
         }
     }
 
 	if(strcmp(username,l.username)!=0 || strcmp(password,l.password)!=0){
-		printf("\nIncorrect Login Details\nPlease enter the correct credentials\n");
+		printf("\nLogil Gagal.\nSilahkan masukkan data anda dengan benar.\n");
 		Sleep(1000);
 	}
 
@@ -1026,10 +1030,11 @@ void loginUser(){
     return;
 }
 
+//fungsi untuk registrasi user baru
 void registration(){
 	FILE *log;
 	user l;
-	char username[30], password[20], fname[30];
+	char username[8], password[8], fname[10];
 
 	log = fopen("login.txt","a");
 	if (log == NULL){
@@ -1037,8 +1042,10 @@ void registration(){
 		exit(1);
 	}
 	
-	printf("\n Please Enter your login credentials below\n\n");
-	// looping cek username dan password sampai benar
+	printf("\n Note!\n 1. Nama maksimal 10 karakter\n"
+			" 2. Username maksimal 8 karakter\n "
+			"3. Password maksimal 8 karakter\n\n");
+	// memasukkan nama penguna, username dan password
 	printf(" Nama Anda: ");
 	scanf(" %[^\n]c", &fname);
 	printf(" Username: ");
@@ -1046,7 +1053,7 @@ void registration(){
 	printf(" Password: ");
 	scanf("%s", &password);
 
-	//username sudah ada di data, maka diulang
+	//error handling username sudah ada di data, maka diulang
 	while(fread(&l, sizeof(l), 1, log)){
 		if(strcmp(username,l.username)==0){
 			printf("\nUsername sudah ada, silahkan masukkan username lain\n");
@@ -1054,7 +1061,7 @@ void registration(){
 			scanf("%s", &username);
 		}
 	}
-	
+	//menulis semua data ke file
 	strcpy(l.fname, fname);
 	strcpy(l.username, username);
 	strcpy(l.password, password);
@@ -1062,7 +1069,7 @@ void registration(){
 	fwrite(&l, sizeof(l), 1, log);
 	fclose(log);
 	
-	printf("\nRegistration Successful\n");
+	printf("\nPendaftaran Berhasil.\n");
 	Sleep(1000);
 	loginUser();
 }
@@ -1121,6 +1128,7 @@ int listUser(struct loginUser *head){
 	fclose(log);
 }
 
+//fungsi untuk mengambil data-data user untuk dimasukkan ke dalam linked list
 void transferDataUser(struct loginUser *head){
 	FILE *log;
 	user l;
@@ -1130,46 +1138,57 @@ void transferDataUser(struct loginUser *head){
 		&& fscanf(log, "%30[^\n]s", l.password) == 1){
 			insert(&head, l.fname, l.username, l.password);
 		}
+	}else{
+		printf("\n  Error at reading File!");
+		Sleep(1000);
 	}
 	fclose(log);
 }
 
+//fungsi untuk memasukkan data user ke dalam linked list
 void insert(struct loginUser **head, char fname[], char username[], char password[]){
 	struct loginUser *log = (struct loginUser*)malloc(sizeof(struct loginUser));
 	struct loginUser *temp = *head;
 
+	//insert data
 	strcpy(log->fname, fname);
 	strcpy(log->username, username);
 	strcpy(log->password, password);
 
-	//if head is NULL, it is an empty list
+	// jika head kosong, maka list kosong
     if(temp == NULL)
          temp = log;
-    //Otherwise, find the last node and add the newNode
+	//mencari node terakhir dan menambah node baru
     else{
-        //last node's next address will be NULL.
-        while(temp->next != NULL)
-        {
+        while(temp->next != NULL){ //ketika temp->next != NULL, maka temp akan berpindah ke node selanjutnya
             temp = temp->next;
         }
-
-        //add the newNode at the end of the linked list
-        temp->next = log;
+        temp->next = log; //node terakhir akan menjadi next dari node baru
     }
 	printList(temp);
 }
 
+//fungsi untuk menampilkan list user yang sudah dihapus
 void printList(struct loginUser *head){
-    struct loginUser *temp = head;
-    //iterate the entire linked list and print the data
-    while(temp != NULL){
-         printf("%s ", temp->fname);
-		 printf("%s ", temp->username);
-		 printf("%s ", temp->password);
-         temp = temp->next;
-    }
-	printf("\nPress any key to continue...");
-	getch();
+	struct loginUser *temp = head;
+    FILE *log;
+		log = fopen("login.txt","w");
+		if (log == NULL){
+			fputs("Error at opening File", stderr);
+			Sleep(1000);
+			exit(1);
+		}
+		temp = head;
+		while(temp != NULL){ //ketika temp != NULL, maka temp akan menulis data ke file
+			fprintf(log, "%s\n", temp->fname); 
+			fprintf(log, "%s\n", temp->username);
+			fprintf(log, "%s\n", temp->password);
+			temp = temp->next;
+		}
+		fclose(log);
+		printf("\nUser berhasil dihapus!\n");
+		Sleep(1000);
+		listUser(temp);
 }
 
 //fungsi untuk menghapus satu user pilihan
@@ -1181,6 +1200,7 @@ void deleteUser(struct loginUser *head){
 	log = fopen("login.txt","r");
 	if (log == NULL){
 		fputs("Error at opening File!", stderr);
+		Sleep(1000);
 		exit(1);
 	}
 
@@ -1211,6 +1231,7 @@ void deleteUser(struct loginUser *head){
 		log = fopen("login.txt","r");
 		if (log == NULL){
 			fputs("Error at opening File!", stderr);
+			Sleep(1000);
 			exit(1);
 		}
 		
@@ -1228,24 +1249,6 @@ void deleteUser(struct loginUser *head){
 			temp = temp->next;
 			j++;
 		}
-
-		FILE *log;
-		log = fopen("login.txt","w");
-		if (log == NULL){
-			fputs("Error at opening File!", stderr);
-			exit(1);
-		}
-		
-		temp = head;
-		while(temp != NULL){
-			fprintf(log, "%s\n", temp->fname);
-			fprintf(log, "%s\n", temp->username);
-			fprintf(log, "%s\n", temp->password);
-			temp = temp->next;
-		}
-		fclose(log);
-		printf("\nUser berhasil dihapus!\n");
-		Sleep(1000);
-		listUser(head);
+		printList(temp);
 	}
 }
